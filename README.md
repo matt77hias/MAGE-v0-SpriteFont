@@ -1,2 +1,4 @@
 # MAGESpritFont
-MAGE sprite font generator
+
+## About
+A command line tool for generating binary sprite fonts for use with SpriteFont in MAGE.
