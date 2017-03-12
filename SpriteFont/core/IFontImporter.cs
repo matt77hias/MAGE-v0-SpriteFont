@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 
-namespace mage {
-   
-    public interface IFontImporter {
-
+namespace mage
+{
+    // Importer interface allows the conversion tool to support multiple source font formats.
+    public interface IFontImporter
+    {
         void Import(CommandLineOptions options);
 
-        IEnumerable< Glyph > Glyphs { get; }
+        IEnumerable<Glyph> Glyphs { get; }
+
         float LineSpacing { get; }
     }
 }

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace mage {
-   
+namespace mage
+{
     // Extracts font glyphs from a specially marked 2D bitmap. Characters should be
     // arranged in a grid ordered from top left to bottom right. Monochrome characters
     // should use white for solid areas and black for transparent areas. To include
@@ -14,49 +14,56 @@ namespace mage {
     // and around the edges of the grid should be filled with bright pink (red=255,
     // green=0, blue=255). It doesn't matter if your grid includes lots of wasted space,
     // because the converter will rearrange characters, packing as tightly as possible.
-    public class BitmapImporter : IFontImporter {
+    public class BitmapImporter : IFontImporter
+    {
+        // Properties hold the imported font data.
+        public IEnumerable<Glyph> Glyphs { get; private set; }
 
-        public IEnumerable< Glyph > Glyphs { get; private set; }
         public float LineSpacing { get; private set; }
 
-        public void Import(CommandLineOptions options) {
-            // Imports the bitmap.
+
+        public void Import(CommandLineOptions options)
+        {
+            // Load the source bitmap.
             Bitmap bitmap;
-            try {
+
+            try
+            {
                 bitmap = new Bitmap(options.SourceFont);
             }
-            catch {
+            catch
+            {
                 throw new Exception(string.Format("Unable to load '{0}'.", options.SourceFont));
             }
 
-            // Convert to the desired pixel format.
+            // Convert to our desired pixel format.
             bitmap = BitmapUtils.ChangePixelFormat(bitmap, PixelFormat.Format32bppArgb);
 
             // What characters are included in this font?
             var characters = CharacterRegion.Flatten(options.CharacterRegions).ToArray();
-            int character_index = 0;
-            char current_character = '\0';
+            int characterIndex = 0;
+            char currentCharacter = '\0';
 
             // Split the source image into a list of individual glyphs.
-            var glyphList = new List< Glyph >();
+            var glyphList = new List<Glyph>();
 
             Glyphs = glyphList;
             LineSpacing = 0;
 
             foreach (Rectangle rectangle in FindGlyphs(bitmap))
             {
-                if (character_index < characters.Length)
-                    current_character = characters[character_index++];
+                if (characterIndex < characters.Length)
+                    currentCharacter = characters[characterIndex++];
                 else
-                    current_character++;
+                    currentCharacter++;
 
-                glyphList.Add(new Glyph(current_character, bitmap, rectangle));
+                glyphList.Add(new Glyph(currentCharacter, bitmap, rectangle));
 
                 LineSpacing = Math.Max(LineSpacing, rectangle.Height);
             }
 
             // If the bitmap doesn't already have an alpha channel, create one now.
-            if (BitmapUtils.IsEntirelyAlpha(255, bitmap))
+            if (BitmapUtils.IsAlphaEntirely(255, bitmap))
             {
                 BitmapUtils.ConvertGreyToAlpha(bitmap);
             }

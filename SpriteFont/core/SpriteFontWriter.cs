@@ -49,14 +49,14 @@ namespace mage
             {
                 writer.Write((int)glyph.Character);
 
-                writer.Write(glyph.Subrectangle.Left);
-                writer.Write(glyph.Subrectangle.Top);
-                writer.Write(glyph.Subrectangle.Right);
-                writer.Write(glyph.Subrectangle.Bottom);
+                writer.Write(glyph.Subrect.Left);
+                writer.Write(glyph.Subrect.Top);
+                writer.Write(glyph.Subrect.Right);
+                writer.Write(glyph.Subrect.Bottom);
 
-                writer.Write(glyph.OffsetX);
-                writer.Write(glyph.OffsetY);
-                writer.Write(glyph.AdvanceX);
+                writer.Write(glyph.XOffset);
+                writer.Write(glyph.YOffset);
+                writer.Write(glyph.XAdvance);
             }
         }
 

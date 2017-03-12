@@ -161,9 +161,9 @@ namespace mage
             // Construct the output Glyph object.
             return new Glyph(character, glyphBitmap)
             {
-                OffsetX = -padWidth,
-                AdvanceX = abc.HasValue ? padWidth - bitmapWidth + abc.Value : -padWidth,
-                OffsetY = -padHeight,
+                XOffset = -padWidth,
+                XAdvance = abc.HasValue ? padWidth - bitmapWidth + abc.Value : -padWidth,
+                YOffset = -padHeight,
             };
         }
 

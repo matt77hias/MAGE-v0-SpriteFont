@@ -23,8 +23,8 @@ namespace mage
                 glyph.Source = sourceGlyphs[i];
 
                 // Leave a one pixel border around every glyph in the output bitmap.
-                glyph.Width = sourceGlyphs[i].Subrectangle.Width + 2;
-                glyph.Height = sourceGlyphs[i].Subrectangle.Height + 2;
+                glyph.Width = sourceGlyphs[i].Subrect.Width + 2;
+                glyph.Height = sourceGlyphs[i].Subrect.Height + 2;
 
                 if (glyph.Width > largestWidth)
                     largestWidth = glyph.Width;
@@ -74,8 +74,8 @@ namespace mage
                 glyph.Source = sourceGlyphs[i];
 
                 // Leave a one pixel border around every glyph in the output bitmap.
-                glyph.Width = sourceGlyphs[i].Subrectangle.Width + 2;
-                glyph.Height = sourceGlyphs[i].Subrectangle.Height + 2;
+                glyph.Width = sourceGlyphs[i].Subrect.Width + 2;
+                glyph.Height = sourceGlyphs[i].Subrect.Height + 2;
 
                 glyphs.Add(glyph);
             }
@@ -122,15 +122,15 @@ namespace mage
             foreach (ArrangedGlyph glyph in glyphs)
             {
                 Glyph sourceGlyph = glyph.Source;
-                Rectangle sourceRegion = sourceGlyph.Subrectangle;
+                Rectangle sourceRegion = sourceGlyph.Subrect;
                 Rectangle destinationRegion = new Rectangle(glyph.X + 1, glyph.Y + 1, sourceRegion.Width, sourceRegion.Height);
 
-                BitmapUtils.CopyRegion(sourceGlyph.Bitmap, sourceRegion, output, destinationRegion);
+                BitmapUtils.CopyRect(sourceGlyph.Bitmap, sourceRegion, output, destinationRegion);
 
                 BitmapUtils.PadBorderPixels(output, destinationRegion);
 
                 sourceGlyph.Bitmap = output;
-                sourceGlyph.Subrectangle = destinationRegion;
+                sourceGlyph.Subrect = destinationRegion;
 
                 usedPixels += (glyph.Width * glyph.Height);
             }
@@ -238,8 +238,8 @@ namespace mage
 
             foreach (Glyph glyph in sourceGlyphs)
             {
-                maxWidth = Math.Max(maxWidth, glyph.Subrectangle.Width);
-                totalSize += glyph.Subrectangle.Width * glyph.Subrectangle.Height;
+                maxWidth = Math.Max(maxWidth, glyph.Subrect.Width);
+                totalSize += glyph.Subrect.Width * glyph.Subrect.Height;
             }
 
             int width = Math.Max((int)Math.Sqrt(totalSize), maxWidth);

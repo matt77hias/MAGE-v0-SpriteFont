@@ -1,35 +1,42 @@
 using System.Drawing;
 
-namespace mage {
-    
+namespace mage
+{
     // Crops unused space from around the edge of a glyph bitmap.
-    public static class GlyphCropper {
-
-        public static void Crop(Glyph glyph) {
-            
+    public static class GlyphCropper
+    {
+        public static void Crop(Glyph glyph)
+        {
             // Crop the top.
-            while ((glyph.Subrectangle.Height > 1) && BitmapUtils.IsEntirelyAlpha(0, glyph.Bitmap, new Rectangle(glyph.Subrectangle.X, glyph.Subrectangle.Y, glyph.Subrectangle.Width, 1))) {
-                glyph.Subrectangle.Y++;
-                glyph.Subrectangle.Height--;
-                glyph.OffsetY++;
+            while ((glyph.Subrect.Height > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, 1)))
+            {
+                glyph.Subrect.Y++;
+                glyph.Subrect.Height--;
+
+                glyph.YOffset++;
             }
 
             // Crop the bottom.
-            while ((glyph.Subrectangle.Height > 1) && BitmapUtils.IsEntirelyAlpha(0, glyph.Bitmap, new Rectangle(glyph.Subrectangle.X, glyph.Subrectangle.Bottom - 1, glyph.Subrectangle.Width, 1))) {
-                glyph.Subrectangle.Height--;
+            while ((glyph.Subrect.Height > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.X, glyph.Subrect.Bottom - 1, glyph.Subrect.Width, 1)))
+            {
+                glyph.Subrect.Height--;
             }
 
             // Crop the left.
-            while ((glyph.Subrectangle.Width > 1) && BitmapUtils.IsEntirelyAlpha(0, glyph.Bitmap, new Rectangle(glyph.Subrectangle.X, glyph.Subrectangle.Y, 1, glyph.Subrectangle.Height))) {
-                glyph.Subrectangle.X++;
-                glyph.Subrectangle.Width--;
-                glyph.OffsetX++;
+            while ((glyph.Subrect.Width > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, 1, glyph.Subrect.Height)))
+            {
+                glyph.Subrect.X++;
+                glyph.Subrect.Width--;
+
+                glyph.XOffset++;
             }
 
             // Crop the right.
-            while ((glyph.Subrectangle.Width > 1) && BitmapUtils.IsEntirelyAlpha(0, glyph.Bitmap, new Rectangle(glyph.Subrectangle.Right - 1, glyph.Subrectangle.Y, 1, glyph.Subrectangle.Height))) {
-                glyph.Subrectangle.Width--;
-                glyph.AdvanceX++;
+            while ((glyph.Subrect.Width > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.Right - 1, glyph.Subrect.Y, 1, glyph.Subrect.Height)))
+            {
+                glyph.Subrect.Width--;
+
+                glyph.XAdvance++;
             }
         }
     }

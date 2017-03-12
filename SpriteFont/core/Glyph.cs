@@ -1,29 +1,32 @@
 using System.Drawing;
 
-namespace mage {
-    
-    public sealed class Glyph {
-
-        private static Rectangle CreateDefaultRegion(Bitmap bitmap) {
-            return new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-        }
-
-        public Glyph(char character, Bitmap bitmap, Rectangle? subrect = null) {
+namespace mage
+{
+    // Represents a single character within a font.
+    public class Glyph
+    {
+        // Constructor.
+        public Glyph(char character, Bitmap bitmap, Rectangle? subrect = null)
+        {
             this.Character = character;
             this.Bitmap = bitmap;
-            this.Subrectangle = subrect.GetValueOrDefault(CreateDefaultRegion(bitmap));
+            this.Subrect = subrect.GetValueOrDefault(new Rectangle(0, 0, bitmap.Width, bitmap.Height));
         }
 
-        // Glyph Unicode character.
-        public char Character { get; set; }
 
-        // Glyph image data.
+        // Unicode codepoint.
+        public char Character;
+
+
+        // Glyph image data (may only use a portion of a larger bitmap).
         public Bitmap Bitmap;
-        public Rectangle Subrectangle;
+        public Rectangle Subrect;
+        
 
-        // Glyph layout data.
-        public float OffsetX { get; set; }
-        public float OffsetY { get; set; }
-        public float AdvanceX { get; set; }
+        // Layout information.
+        public float XOffset;
+        public float YOffset;
+
+        public float XAdvance;
     }
 }
