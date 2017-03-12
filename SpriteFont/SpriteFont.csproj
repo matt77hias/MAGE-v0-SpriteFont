@@ -7,8 +7,8 @@
     <ProjectGuid>{CB00E911-9A6A-41F3-BBB3-EA920772FA9B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MAGESpriteFont</RootNamespace>
-    <AssemblyName>MAGESpriteFont</AssemblyName>
+    <RootNamespace>SpriteFont</RootNamespace>
+    <AssemblyName>SpriteFont</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
