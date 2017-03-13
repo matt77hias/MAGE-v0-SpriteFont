@@ -81,12 +81,12 @@ namespace mage {
             lineSpacing += options.LineSpacing;
 
             foreach (Glyph glyph in glyphs) {
-                glyph.XAdvance += options.CharacterSpacing;
+                glyph.AdvanceX += options.CharacterSpacing;
             }
 
             // Automatically detect whether this is a monochromatic or color font?
             if (options.TextureFormat == TextureFormat.Auto) {
-                bool isMono = BitmapUtils.IsRgbEntirely(Color.White, bitmap);
+                bool isMono = BitmapUtils.MatchesRGB(Color.White, bitmap);
 
                 options.TextureFormat = isMono ? TextureFormat.CompressedMono :
                                                  TextureFormat.Rgba32;
@@ -96,7 +96,7 @@ namespace mage {
             if (!options.NoPremultiply) {
                 Console.WriteLine("Premultiplying alpha");
 
-                BitmapUtils.PremultiplyAlpha(bitmap);
+                BitmapUtils.ConvertToPremultipliedAlpha(bitmap);
             }
 
             // Save output files.

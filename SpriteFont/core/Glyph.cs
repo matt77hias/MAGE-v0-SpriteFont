@@ -1,29 +1,31 @@
+using System;
 using System.Drawing;
 
 namespace mage {
-    // Represents a single character within a font.
-    public class Glyph {
-        // Constructor.
-        public Glyph(char character, Bitmap bitmap, Rectangle? subrect = null) {
-            this.Character = character;
-            this.Bitmap = bitmap;
-            this.Subrect = subrect.GetValueOrDefault(new Rectangle(0, 0, bitmap.Width, bitmap.Height));
+   
+    // A class of single characters within a font.
+    public sealed class Glyph {
+        
+        public Glyph(char character, Bitmap bitmap, Rectangle? region = null) {
+            if (bitmap == null) {
+                throw new NullReferenceException("The given bitmap may not be equal to null.");
+            }
+
+            Character = character;
+            Bitmap = bitmap;
+            Region = region.GetValueOrDefault(BitmapUtils.GetRegion(bitmap));
         }
 
+        // Glyph character.
+        public char Character { get; set; }
 
-        // Unicode codepoint.
-        public char Character;
+        // Glyph image data.
+        public Bitmap Bitmap { get; set; }
+        public Rectangle Region;
 
-
-        // Glyph image data (may only use a portion of a larger bitmap).
-        public Bitmap Bitmap;
-        public Rectangle Subrect;
-
-
-        // Layout information.
-        public float XOffset;
-        public float YOffset;
-
-        public float XAdvance;
+        // Glyph layout information.
+        public float OffsetX { get; set; }
+        public float OffsetY { get; set; }
+        public float AdvanceX { get; set; }
     }
 }

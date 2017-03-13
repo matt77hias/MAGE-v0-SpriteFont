@@ -32,7 +32,7 @@ namespace mage {
             }
 
             // Convert to our desired pixel format.
-            bitmap = BitmapUtils.ChangePixelFormat(bitmap, PixelFormat.Format32bppArgb);
+            bitmap = BitmapUtils.ConvertToPixelFormat(bitmap, PixelFormat.Format32bppArgb);
 
             // What characters are included in this font?
             var characters = CharacterRegion.Flatten(options.CharacterRegions).ToArray();
@@ -57,7 +57,7 @@ namespace mage {
             }
 
             // If the bitmap doesn't already have an alpha channel, create one now.
-            if (BitmapUtils.IsAlphaEntirely(255, bitmap)) {
+            if (BitmapUtils.MatchesAlpha(255, bitmap)) {
                 BitmapUtils.ConvertGreyToAlpha(bitmap);
             }
         }

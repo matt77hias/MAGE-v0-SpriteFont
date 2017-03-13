@@ -5,31 +5,31 @@ namespace mage {
     public static class GlyphCropper {
         public static void Crop(Glyph glyph) {
             // Crop the top.
-            while ((glyph.Subrect.Height > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, 1))) {
-                glyph.Subrect.Y++;
-                glyph.Subrect.Height--;
+            while ((glyph.Region.Height > 1) && BitmapUtils.MatchesAlpha(0, glyph.Bitmap, new Rectangle(glyph.Region.X, glyph.Region.Y, glyph.Region.Width, 1))) {
+                glyph.Region.Y++;
+                glyph.Region.Height--;
 
-                glyph.YOffset++;
+                glyph.OffsetY++;
             }
 
             // Crop the bottom.
-            while ((glyph.Subrect.Height > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.X, glyph.Subrect.Bottom - 1, glyph.Subrect.Width, 1))) {
-                glyph.Subrect.Height--;
+            while ((glyph.Region.Height > 1) && BitmapUtils.MatchesAlpha(0, glyph.Bitmap, new Rectangle(glyph.Region.X, glyph.Region.Bottom - 1, glyph.Region.Width, 1))) {
+                glyph.Region.Height--;
             }
 
             // Crop the left.
-            while ((glyph.Subrect.Width > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, 1, glyph.Subrect.Height))) {
-                glyph.Subrect.X++;
-                glyph.Subrect.Width--;
+            while ((glyph.Region.Width > 1) && BitmapUtils.MatchesAlpha(0, glyph.Bitmap, new Rectangle(glyph.Region.X, glyph.Region.Y, 1, glyph.Region.Height))) {
+                glyph.Region.X++;
+                glyph.Region.Width--;
 
-                glyph.XOffset++;
+                glyph.OffsetX++;
             }
 
             // Crop the right.
-            while ((glyph.Subrect.Width > 1) && BitmapUtils.IsAlphaEntirely(0, glyph.Bitmap, new Rectangle(glyph.Subrect.Right - 1, glyph.Subrect.Y, 1, glyph.Subrect.Height))) {
-                glyph.Subrect.Width--;
+            while ((glyph.Region.Width > 1) && BitmapUtils.MatchesAlpha(0, glyph.Bitmap, new Rectangle(glyph.Region.Right - 1, glyph.Region.Y, 1, glyph.Region.Height))) {
+                glyph.Region.Width--;
 
-                glyph.XAdvance++;
+                glyph.AdvanceX++;
             }
         }
     }

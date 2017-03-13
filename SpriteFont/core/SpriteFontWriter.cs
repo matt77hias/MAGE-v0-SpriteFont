@@ -41,14 +41,14 @@ namespace mage {
             foreach (Glyph glyph in glyphs) {
                 writer.Write((int)glyph.Character);
 
-                writer.Write(glyph.Subrect.Left);
-                writer.Write(glyph.Subrect.Top);
-                writer.Write(glyph.Subrect.Right);
-                writer.Write(glyph.Subrect.Bottom);
+                writer.Write(glyph.Region.Left);
+                writer.Write(glyph.Region.Top);
+                writer.Write(glyph.Region.Right);
+                writer.Write(glyph.Region.Bottom);
 
-                writer.Write(glyph.XOffset);
-                writer.Write(glyph.YOffset);
-                writer.Write(glyph.XAdvance);
+                writer.Write(glyph.OffsetX);
+                writer.Write(glyph.OffsetY);
+                writer.Write(glyph.AdvanceX);
             }
         }
 
