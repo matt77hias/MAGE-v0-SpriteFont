@@ -7,11 +7,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.ComponentModel;
 
-namespace mage
-{
+namespace mage {
     // Reusable, reflection based helper for parsing commandline options.
-    public class CommandLineParser
-    {
+    public class CommandLineParser {
         object optionsObject;
 
         Queue<FieldInfo> requiredOptions = new Queue<FieldInfo>();
@@ -22,33 +20,27 @@ namespace mage
 
 
         // Constructor.
-        public CommandLineParser(object optionsObject)
-        {
+        public CommandLineParser(object optionsObject) {
             this.optionsObject = optionsObject;
 
             // Reflect to find what commandline options are available.
-            foreach (FieldInfo field in optionsObject.GetType().GetFields())
-            {
+            foreach (FieldInfo field in optionsObject.GetType().GetFields()) {
                 string fieldName = GetOptionName(field);
 
-                if (GetAttribute<RequiredAttribute>(field) != null)
-                {
+                if (GetAttribute<RequiredAttribute>(field) != null) {
                     // Record a required option.
                     requiredOptions.Enqueue(field);
 
                     requiredUsageHelp.Add(string.Format("<{0}>", fieldName));
                 }
-                else
-                {
+                else {
                     // Record an optional option.
                     optionalOptions.Add(fieldName.ToLowerInvariant(), field);
 
-                    if (field.FieldType == typeof(bool))
-                    {
+                    if (field.FieldType == typeof(bool)) {
                         optionalUsageHelp.Add(string.Format("/{0}", fieldName));
                     }
-                    else
-                    {
+                    else {
                         optionalUsageHelp.Add(string.Format("/{0}:value", fieldName));
                     }
                 }
@@ -56,13 +48,10 @@ namespace mage
         }
 
 
-        public bool ParseCommandLine(string[] args)
-        {
+        public bool ParseCommandLine(string[] args) {
             // Parse each argument in turn.
-            foreach (string arg in args)
-            {
-                if (!ParseArgument(arg.Trim()))
-                {
+            foreach (string arg in args) {
+                if (!ParseArgument(arg.Trim())) {
                     return false;
                 }
             }
@@ -70,8 +59,7 @@ namespace mage
             // Make sure we got all the required options.
             FieldInfo missingRequiredOption = requiredOptions.FirstOrDefault(field => !IsList(field) || GetList(field).Count == 0);
 
-            if (missingRequiredOption != null)
-            {
+            if (missingRequiredOption != null) {
                 ShowError("Missing argument '{0}'", GetOptionName(missingRequiredOption));
                 return false;
             }
@@ -80,10 +68,8 @@ namespace mage
         }
 
 
-        bool ParseArgument(string arg)
-        {
-            if (arg.StartsWith("/"))
-            {
+        bool ParseArgument(string arg) {
+            if (arg.StartsWith("/")) {
                 // Parse an optional argument.
                 char[] separators = { ':' };
 
@@ -94,27 +80,23 @@ namespace mage
 
                 FieldInfo field;
 
-                if (!optionalOptions.TryGetValue(name.ToLowerInvariant(), out field))
-                {
+                if (!optionalOptions.TryGetValue(name.ToLowerInvariant(), out field)) {
                     ShowError("Unknown option '{0}'", name);
                     return false;
                 }
 
                 return SetOption(field, value);
             }
-            else
-            {
+            else {
                 // Parse a required argument.
-                if (requiredOptions.Count == 0)
-                {
+                if (requiredOptions.Count == 0) {
                     ShowError("Too many arguments");
                     return false;
                 }
 
                 FieldInfo field = requiredOptions.Peek();
 
-                if (!IsList(field))
-                {
+                if (!IsList(field)) {
                     requiredOptions.Dequeue();
                 }
 
@@ -123,53 +105,44 @@ namespace mage
         }
 
 
-        bool SetOption(FieldInfo field, string value)
-        {
-            try
-            {
-                if (IsList(field))
-                {
+        bool SetOption(FieldInfo field, string value) {
+            try {
+                if (IsList(field)) {
                     // Append this value to a list of options.
                     GetList(field).Add(ChangeType(value, ListElementType(field)));
                 }
-                else
-                {
+                else {
                     // Set the value of a single option.
                     field.SetValue(optionsObject, ChangeType(value, field.FieldType));
                 }
 
                 return true;
             }
-            catch
-            {
+            catch {
                 ShowError("Invalid value '{0}' for option '{1}'", value, GetOptionName(field));
                 return false;
             }
         }
 
 
-        static object ChangeType(string value, Type type)
-        {
+        static object ChangeType(string value, Type type) {
             TypeConverter converter = TypeDescriptor.GetConverter(type);
 
             return converter.ConvertFromInvariantString(value);
         }
 
 
-        static bool IsList(FieldInfo field)
-        {
+        static bool IsList(FieldInfo field) {
             return typeof(IList).IsAssignableFrom(field.FieldType);
         }
 
 
-        IList GetList(FieldInfo field)
-        {
+        IList GetList(FieldInfo field) {
             return (IList)field.GetValue(optionsObject);
         }
 
 
-        static Type ListElementType(FieldInfo field)
-        {
+        static Type ListElementType(FieldInfo field) {
             var interfaces = from i in field.FieldType.GetInterfaces()
                              where i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>)
                              select i;
@@ -178,61 +151,51 @@ namespace mage
         }
 
 
-        static string GetOptionName(FieldInfo field)
-        {
+        static string GetOptionName(FieldInfo field) {
             var nameAttribute = GetAttribute<NameAttribute>(field);
 
-            if (nameAttribute != null)
-            {
+            if (nameAttribute != null) {
                 return nameAttribute.Name;
             }
-            else
-            {
+            else {
                 return field.Name;
             }
         }
 
 
-        void ShowError(string message, params object[] args)
-        {
+        void ShowError(string message, params object[] args) {
             string name = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().ProcessName);
 
             Console.Error.WriteLine(message, args);
             Console.Error.WriteLine();
             Console.Error.WriteLine("Usage: {0} {1}", name, string.Join(" ", requiredUsageHelp));
 
-            if (optionalUsageHelp.Count > 0)
-            {
+            if (optionalUsageHelp.Count > 0) {
                 Console.Error.WriteLine();
                 Console.Error.WriteLine("Options:");
 
-                foreach (string optional in optionalUsageHelp)
-                {
+                foreach (string optional in optionalUsageHelp) {
                     Console.Error.WriteLine("    {0}", optional);
                 }
             }
         }
 
 
-        static T GetAttribute<T>(ICustomAttributeProvider provider) where T : Attribute
-        {
+        static T GetAttribute<T>(ICustomAttributeProvider provider) where T : Attribute {
             return provider.GetCustomAttributes(typeof(T), false).OfType<T>().FirstOrDefault();
         }
 
 
         // Used on optionsObject fields to indicate which options are required.
         [AttributeUsage(AttributeTargets.Field)]
-        public sealed class RequiredAttribute : Attribute
-        { 
+        public sealed class RequiredAttribute : Attribute {
         }
 
 
         // Used on an optionsObject field to rename the corresponding commandline option.
         [AttributeUsage(AttributeTargets.Field)]
-        public sealed class NameAttribute : Attribute
-        {
-            public NameAttribute(string name)
-            {
+        public sealed class NameAttribute : Attribute {
+            public NameAttribute(string name) {
                 this.Name = name;
             }
 

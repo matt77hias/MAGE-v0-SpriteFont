@@ -3,12 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Drawing;
 
-namespace mage
-{
-    public class Program
-    {
-        public static int Main(string[] args)
-        {
+namespace mage {
+    public class Program {
+        public static int Main(string[] args) {
             // Parse the commandline options.
             var options = new CommandLineOptions();
             var parser = new CommandLineParser(options);
@@ -16,26 +13,23 @@ namespace mage
             if (!parser.ParseCommandLine(args))
                 return 1;
 
-            try
-            {
+            try {
                 // Convert the font.
                 MakeSpriteFont(options);
-                
+
                 return 0;
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 // Print an error message if conversion failed.
                 Console.WriteLine();
                 Console.Error.WriteLine("Error: {0}", e.Message);
-     
+
                 return 1;
             }
         }
 
 
-        static void MakeSpriteFont(CommandLineOptions options)
-        {
+        static void MakeSpriteFont(CommandLineOptions options) {
             // Import.
             Console.WriteLine("Importing {0}", options.SourceFont);
 
@@ -48,8 +42,7 @@ namespace mage
             // Optimize.
             Console.WriteLine("Cropping glyph borders");
 
-            foreach (Glyph glyph in glyphs)
-            {
+            foreach (Glyph glyph in glyphs) {
                 GlyphCropper.Crop(glyph);
             }
 
@@ -57,38 +50,29 @@ namespace mage
 
             Bitmap bitmap;
 
-            if (options.FastPack)
-            {
+            if (options.FastPack) {
                 bitmap = GlyphPacker.ArrangeGlyphsFast(glyphs);
             }
-            else
-            {
+            else {
                 bitmap = GlyphPacker.ArrangeGlyphs(glyphs);
             }
 
             // Emit texture size warning based on known Feature Level limits.
-            if (bitmap.Width > 16384 || bitmap.Height > 16384)
-            {
+            if (bitmap.Width > 16384 || bitmap.Height > 16384) {
                 Console.WriteLine("WARNING: Resulting texture is too large for all known Feature Levels (9.1 - 12.1)");
             }
-            else if (bitmap.Width > 8192 || bitmap.Height > 8192)
-            {
-                if (options.FeatureLevel < FeatureLevel.FL11_0)
-                {
+            else if (bitmap.Width > 8192 || bitmap.Height > 8192) {
+                if (options.FeatureLevel < FeatureLevel.FL11_0) {
                     Console.WriteLine("WARNING: Resulting texture requires a Feature Level 11.0 or later device.");
                 }
             }
-            else if (bitmap.Width > 4096 || bitmap.Height > 4096)
-            {
-                if (options.FeatureLevel < FeatureLevel.FL10_0)
-                {
+            else if (bitmap.Width > 4096 || bitmap.Height > 4096) {
+                if (options.FeatureLevel < FeatureLevel.FL10_0) {
                     Console.WriteLine("WARNING: Resulting texture requires a Feature Level 10.0 or later device.");
                 }
             }
-            else if (bitmap.Width > 2048 || bitmap.Height > 2048)
-            {
-                if (options.FeatureLevel < FeatureLevel.FL9_3)
-                {
+            else if (bitmap.Width > 2048 || bitmap.Height > 2048) {
+                if (options.FeatureLevel < FeatureLevel.FL9_3) {
                     Console.WriteLine("WARNING: Resulting texture requires a Feature Level 9.3 or later device.");
                 }
             }
@@ -96,14 +80,12 @@ namespace mage
             // Adjust line and character spacing.
             lineSpacing += options.LineSpacing;
 
-            foreach (Glyph glyph in glyphs)
-            {
+            foreach (Glyph glyph in glyphs) {
                 glyph.XAdvance += options.CharacterSpacing;
             }
 
             // Automatically detect whether this is a monochromatic or color font?
-            if (options.TextureFormat == TextureFormat.Auto)
-            {
+            if (options.TextureFormat == TextureFormat.Auto) {
                 bool isMono = BitmapUtils.IsRgbEntirely(Color.White, bitmap);
 
                 options.TextureFormat = isMono ? TextureFormat.CompressedMono :
@@ -111,16 +93,14 @@ namespace mage
             }
 
             // Convert to premultiplied alpha format.
-            if (!options.NoPremultiply)
-            {
+            if (!options.NoPremultiply) {
                 Console.WriteLine("Premultiplying alpha");
 
                 BitmapUtils.PremultiplyAlpha(bitmap);
             }
 
             // Save output files.
-            if (!string.IsNullOrEmpty(options.DebugOutputSpriteSheet))
-            {
+            if (!string.IsNullOrEmpty(options.DebugOutputSpriteSheet)) {
                 Console.WriteLine("Saving debug output spritesheet {0}", options.DebugOutputSpriteSheet);
 
                 bitmap.Save(options.DebugOutputSpriteSheet);
@@ -132,8 +112,7 @@ namespace mage
         }
 
 
-        static Glyph[] ImportFont(CommandLineOptions options, out float lineSpacing)
-        {
+        static Glyph[] ImportFont(CommandLineOptions options, out float lineSpacing) {
             // Which importer knows how to read this source font?
             IFontImporter importer;
 
@@ -141,12 +120,10 @@ namespace mage
 
             string[] BitmapFileExtensions = { ".bmp", ".png", ".gif" };
 
-            if (BitmapFileExtensions.Contains(fileExtension))
-            {
+            if (BitmapFileExtensions.Contains(fileExtension)) {
                 importer = new BitmapImporter();
             }
-            else
-            {
+            else {
                 importer = new TrueTypeImporter();
             }
 
@@ -160,13 +137,11 @@ namespace mage
                                  .ToArray();
 
             // Validate.
-            if (glyphs.Length == 0)
-            {
+            if (glyphs.Length == 0) {
                 throw new Exception("Font does not contain any glyphs.");
             }
 
-            if ((options.DefaultCharacter != 0) && !glyphs.Any(glyph => glyph.Character == options.DefaultCharacter))
-            {
+            if ((options.DefaultCharacter != 0) && !glyphs.Any(glyph => glyph.Character == options.DefaultCharacter)) {
                 throw new Exception("The specified DefaultCharacter is not part of this font.");
             }
 

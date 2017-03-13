@@ -7,11 +7,9 @@ using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
 
-namespace mage
-{
+namespace mage {
     // Uses System.Drawing (aka GDI+) to rasterize TrueType fonts into a series of glyph bitmaps.
-    public class TrueTypeImporter : IFontImporter
-    {
+    public class TrueTypeImporter : IFontImporter {
         // Properties hold the imported font data.
         public IEnumerable<Glyph> Glyphs { get; private set; }
 
@@ -22,15 +20,13 @@ namespace mage
         const int MaxGlyphSize = 1024;
 
 
-        public void Import(CommandLineOptions options)
-        {
+        public void Import(CommandLineOptions options) {
             // Create a bunch of GDI+ objects.
             using (Font font = CreateFont(options))
             using (Brush brush = new SolidBrush(Color.White))
             using (StringFormat stringFormat = new StringFormat(StringFormatFlags.NoFontFallback))
             using (Bitmap bitmap = new Bitmap(MaxGlyphSize, MaxGlyphSize, PixelFormat.Format32bppArgb))
-            using (Graphics graphics = Graphics.FromImage(bitmap))
-            {
+            using (Graphics graphics = Graphics.FromImage(bitmap)) {
                 graphics.PixelOffsetMode = options.Sharp ? PixelOffsetMode.None : PixelOffsetMode.HighQuality;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 graphics.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
@@ -43,20 +39,16 @@ namespace mage
                 // Rasterize each character in turn.
                 int count = 0;
 
-                foreach (char character in characters)
-                {
+                foreach (char character in characters) {
                     ++count;
 
-                    if (count == 500)
-                    {
-                        if (!options.FastPack)
-                        {
+                    if (count == 500) {
+                        if (!options.FastPack) {
                             Console.WriteLine("WARNING: capturing a large font. This may take a long time to complete and could result in too large a texture. Consider using /FastPack.");
                         }
                         Console.Write(".");
                     }
-                    else if ((count % 500) == 0)
-                    {
+                    else if ((count % 500) == 0) {
                         Console.Write(".");
                     }
 
@@ -65,8 +57,7 @@ namespace mage
                     glyphList.Add(glyph);
                 }
 
-                if (count > 500)
-                {
+                if (count > 500) {
                     Console.WriteLine();
                 }
 
@@ -79,28 +70,23 @@ namespace mage
 
 
         // Attempts to instantiate the requested GDI+ font object.
-        static Font CreateFont(CommandLineOptions options)
-        {
+        static Font CreateFont(CommandLineOptions options) {
             Font font = new Font(options.SourceFont, PointsToPixels(options.FontSize), options.FontStyle, GraphicsUnit.Pixel);
 
-            try
-            {
+            try {
                 // The font constructor automatically substitutes fonts if it can't find the one requested.
                 // But we prefer the caller to know if anything is wrong with their data. A simple string compare
                 // isn't sufficient because some fonts (eg. MS Mincho) change names depending on the locale.
 
                 // Early out: in most cases the name will match the current or invariant culture.
                 if (options.SourceFont.Equals(font.FontFamily.GetName(CultureInfo.CurrentCulture.LCID), StringComparison.OrdinalIgnoreCase) ||
-                    options.SourceFont.Equals(font.FontFamily.GetName(CultureInfo.InvariantCulture.LCID), StringComparison.OrdinalIgnoreCase))
-                {
+                    options.SourceFont.Equals(font.FontFamily.GetName(CultureInfo.InvariantCulture.LCID), StringComparison.OrdinalIgnoreCase)) {
                     return font;
                 }
 
                 // Check the font name in every culture.
-                foreach (CultureInfo culture in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
-                {
-                    if (options.SourceFont.Equals(font.FontFamily.GetName(culture.LCID), StringComparison.OrdinalIgnoreCase))
-                    {
+                foreach (CultureInfo culture in CultureInfo.GetCultures(CultureTypes.SpecificCultures)) {
+                    if (options.SourceFont.Equals(font.FontFamily.GetName(culture.LCID), StringComparison.OrdinalIgnoreCase)) {
                         return font;
                     }
                 }
@@ -108,8 +94,7 @@ namespace mage
                 // A font substitution must have occurred.
                 throw new Exception(string.Format("Can't find font '{0}'.", options.SourceFont));
             }
-            catch
-            {
+            catch {
                 font.Dispose();
                 throw;
             }
@@ -118,15 +103,13 @@ namespace mage
 
         // Converts a font size from points to pixels. Can't just let GDI+ do this for us,
         // because we want identical results on every machine regardless of system DPI settings.
-        static float PointsToPixels(float points)
-        {
+        static float PointsToPixels(float points) {
             return points * 96 / 72;
         }
 
-        
+
         // Rasterizes a single character glyph.
-        static Glyph ImportGlyph(char character, Font font, Brush brush, StringFormat stringFormat, Bitmap bitmap, Graphics graphics)
-        {
+        static Glyph ImportGlyph(char character, Font font, Brush brush, StringFormat stringFormat, Bitmap bitmap, Graphics graphics) {
             string characterString = character.ToString();
 
             // Measure the size of this character.
@@ -159,8 +142,7 @@ namespace mage
             float? abc = GetCharacterWidth(character, font, graphics);
 
             // Construct the output Glyph object.
-            return new Glyph(character, glyphBitmap)
-            {
+            return new Glyph(character, glyphBitmap) {
                 XOffset = -padWidth,
                 XAdvance = abc.HasValue ? padWidth - bitmapWidth + abc.Value : -padWidth,
                 YOffset = -padHeight,
@@ -169,56 +151,46 @@ namespace mage
 
 
         // Queries APC spacing for the specified character.
-        static float? GetCharacterWidth(char character, Font font, Graphics graphics)
-        {
+        static float? GetCharacterWidth(char character, Font font, Graphics graphics) {
             // Look up the native device context and font handles.
             IntPtr hdc = graphics.GetHdc();
 
-            try
-            {
+            try {
                 IntPtr hFont = font.ToHfont();
 
-                try
-                {
+                try {
                     // Select our font into the DC.
                     IntPtr oldFont = NativeMethods.SelectObject(hdc, hFont);
 
-                    try
-                    {
+                    try {
                         // Query the character spacing.
                         var result = new NativeMethods.ABCFloat[1];
 
-                        if (NativeMethods.GetCharABCWidthsFloat(hdc, character, character, result))
-                        {
-                            return result[0].A + 
-                                   result[0].B + 
+                        if (NativeMethods.GetCharABCWidthsFloat(hdc, character, character, result)) {
+                            return result[0].A +
+                                   result[0].B +
                                    result[0].C;
                         }
-                        else
-                        {
+                        else {
                             return null;
                         }
                     }
-                    finally
-                    {
+                    finally {
                         NativeMethods.SelectObject(hdc, oldFont);
                     }
                 }
-                finally
-                {
+                finally {
                     NativeMethods.DeleteObject(hFont);
                 }
             }
-            finally
-            {
+            finally {
                 graphics.ReleaseHdc(hdc);
             }
         }
 
 
         // Interop to the native GDI GetCharABCWidthsFloat method.
-        static class NativeMethods
-        {
+        static class NativeMethods {
             [DllImport("gdi32.dll")]
             public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hObject);
 
@@ -230,8 +202,7 @@ namespace mage
 
 
             [StructLayout(LayoutKind.Sequential)]
-            public struct ABCFloat
-            {
+            public struct ABCFloat {
                 public float A;
                 public float B;
                 public float C;

@@ -1,11 +1,9 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace mage
-{
+namespace mage {
     // Available output texture formats.
-    public enum TextureFormat
-    {
+    public enum TextureFormat {
         Auto,
         Rgba32,
         Bgra4444,
@@ -14,8 +12,7 @@ namespace mage
 
 
     // Feature levels
-    public enum FeatureLevel
-    {
+    public enum FeatureLevel {
         FL9_1,
         FL9_2,
         FL9_3,
@@ -29,8 +26,7 @@ namespace mage
 
 
     // Options telling the tool what to do.
-    public class CommandLineOptions
-    {
+    public class CommandLineOptions {
         // Input can be either a system (TrueType) font or a specially marked bitmap file.
         [CommandLineParser.Required]
         public string SourceFont;

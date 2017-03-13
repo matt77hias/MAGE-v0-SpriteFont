@@ -3,11 +3,9 @@ using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
 
-namespace mage
-{
+namespace mage {
     // Writes the output spritefont binary file.
-    public static class SpriteFontWriter
-    {
+    public static class SpriteFontWriter {
         const string spriteFontMagic = "MAGEfont";
 
         const int DXGI_FORMAT_R8G8B8A8_UNORM = 28;
@@ -16,37 +14,31 @@ namespace mage
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public static void WriteSpriteFont(CommandLineOptions options, Glyph[] glyphs, float lineSpacing, Bitmap bitmap)
-        {
+        public static void WriteSpriteFont(CommandLineOptions options, Glyph[] glyphs, float lineSpacing, Bitmap bitmap) {
             using (FileStream file = File.OpenWrite(options.OutputFile))
-            using (BinaryWriter writer = new BinaryWriter(file))
-            {
+            using (BinaryWriter writer = new BinaryWriter(file)) {
                 WriteMagic(writer);
                 WriteGlyphs(writer, glyphs);
 
                 writer.Write(lineSpacing);
                 writer.Write(options.DefaultCharacter);
-                
+
                 WriteBitmap(writer, options, bitmap);
             }
         }
 
 
-        static void WriteMagic(BinaryWriter writer)
-        {
-            foreach (char magic in spriteFontMagic)
-            {
+        static void WriteMagic(BinaryWriter writer) {
+            foreach (char magic in spriteFontMagic) {
                 writer.Write((byte)magic);
             }
         }
 
 
-        static void WriteGlyphs(BinaryWriter writer, Glyph[] glyphs)
-        {
+        static void WriteGlyphs(BinaryWriter writer, Glyph[] glyphs) {
             writer.Write(glyphs.Length);
 
-            foreach (Glyph glyph in glyphs)
-            {
+            foreach (Glyph glyph in glyphs) {
                 writer.Write((int)glyph.Character);
 
                 writer.Write(glyph.Subrect.Left);
@@ -61,25 +53,23 @@ namespace mage
         }
 
 
-        static void WriteBitmap(BinaryWriter writer, CommandLineOptions options, Bitmap bitmap)
-        {
+        static void WriteBitmap(BinaryWriter writer, CommandLineOptions options, Bitmap bitmap) {
             writer.Write(bitmap.Width);
             writer.Write(bitmap.Height);
 
-            switch (options.TextureFormat)
-            {
+            switch (options.TextureFormat) {
                 case TextureFormat.Rgba32:
                     WriteRgba32(writer, bitmap);
                     break;
-             
+
                 case TextureFormat.Bgra4444:
                     WriteBgra4444(writer, bitmap);
                     break;
-                
+
                 case TextureFormat.CompressedMono:
                     WriteCompressedMono(writer, bitmap, options);
                     break;
-                
+
                 default:
                     throw new NotSupportedException();
             }
@@ -87,19 +77,15 @@ namespace mage
 
 
         // Writes an uncompressed 32 bit font texture.
-        static void WriteRgba32(BinaryWriter writer, Bitmap bitmap)
-        {
+        static void WriteRgba32(BinaryWriter writer, Bitmap bitmap) {
             writer.Write(DXGI_FORMAT_R8G8B8A8_UNORM);
 
             writer.Write(bitmap.Width * 4);
             writer.Write(bitmap.Height);
 
-            using (var bitmapData = new BitmapUtils.PixelAccessor(bitmap, ImageLockMode.ReadOnly))
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    for (int x = 0; x < bitmap.Width; x++)
-                    {
+            using (var bitmapData = new BitmapUtils.PixelAccessor(bitmap, ImageLockMode.ReadOnly)) {
+                for (int y = 0; y < bitmap.Height; y++) {
+                    for (int x = 0; x < bitmap.Width; x++) {
                         Color color = bitmapData[x, y];
 
                         writer.Write(color.R);
@@ -113,19 +99,15 @@ namespace mage
 
 
         // Writes a 16 bit font texture.
-        static void WriteBgra4444(BinaryWriter writer, Bitmap bitmap)
-        {
+        static void WriteBgra4444(BinaryWriter writer, Bitmap bitmap) {
             writer.Write(DXGI_FORMAT_B4G4R4A4_UNORM);
 
             writer.Write(bitmap.Width * sizeof(ushort));
             writer.Write(bitmap.Height);
 
-            using (var bitmapData = new BitmapUtils.PixelAccessor(bitmap, ImageLockMode.ReadOnly))
-            {
-                for (int y = 0; y < bitmap.Height; y++)
-                {
-                    for (int x = 0; x < bitmap.Width; x++)
-                    {
+            using (var bitmapData = new BitmapUtils.PixelAccessor(bitmap, ImageLockMode.ReadOnly)) {
+                for (int y = 0; y < bitmap.Height; y++) {
+                    for (int x = 0; x < bitmap.Width; x++) {
                         Color color = bitmapData[x, y];
 
                         int r = color.R >> 4;
@@ -143,11 +125,9 @@ namespace mage
 
 
         // Writes a block compressed monochromatic font texture.
-        static void WriteCompressedMono(BinaryWriter writer, Bitmap bitmap, CommandLineOptions options)
-        {
+        static void WriteCompressedMono(BinaryWriter writer, Bitmap bitmap, CommandLineOptions options) {
             if ((bitmap.Width & 3) != 0 ||
-                (bitmap.Height & 3) != 0)
-            {
+                (bitmap.Height & 3) != 0) {
                 throw new ArgumentException("Block compression requires texture size to be a multiple of 4.");
             }
 
@@ -156,12 +136,9 @@ namespace mage
             writer.Write(bitmap.Width * 4);
             writer.Write(bitmap.Height / 4);
 
-            using (var bitmapData = new BitmapUtils.PixelAccessor(bitmap, ImageLockMode.ReadOnly))
-            {
-                for (int y = 0; y < bitmap.Height; y += 4)
-                {
-                    for (int x = 0; x < bitmap.Width; x += 4)
-                    {
+            using (var bitmapData = new BitmapUtils.PixelAccessor(bitmap, ImageLockMode.ReadOnly)) {
+                for (int y = 0; y < bitmap.Height; y += 4) {
+                    for (int x = 0; x < bitmap.Width; x += 4) {
                         CompressBlock(writer, bitmapData, x, y, options);
                     }
                 }
@@ -192,48 +169,39 @@ namespace mage
         // the possible 16 alpha values available in DXT3, so we can ensure the RGB and 
         // alpha channels always exactly match.
 
-        static void CompressBlock(BinaryWriter writer, BitmapUtils.PixelAccessor bitmapData, int blockX, int blockY, CommandLineOptions options)
-        {
+        static void CompressBlock(BinaryWriter writer, BitmapUtils.PixelAccessor bitmapData, int blockX, int blockY, CommandLineOptions options) {
             long alphaBits = 0;
             int rgbBits = 0;
 
             int pixelCount = 0;
 
-            for (int y = 0; y < 4; y++)
-            {
-                for (int x = 0; x < 4; x++)
-                {
+            for (int y = 0; y < 4; y++) {
+                for (int x = 0; x < 4; x++) {
                     long alpha;
                     int rgb;
 
                     int value = bitmapData[blockX + x, blockY + y].A;
 
-                    if (options.NoPremultiply)
-                    {
+                    if (options.NoPremultiply) {
                         // If we are not premultiplied, RGB is always white and we have 4 bit alpha.
                         alpha = value >> 4;
                         rgb = 0;
                     }
-                    else
-                    {
+                    else {
                         // For premultiplied encoding, quantize the source value to 2 bit precision.
-                        if (value < 256 / 6)
-                        {
+                        if (value < 256 / 6) {
                             alpha = 0;
                             rgb = 1;
                         }
-                        else if (value < 256 / 2)
-                        {
+                        else if (value < 256 / 2) {
                             alpha = 5;
                             rgb = 3;
                         }
-                        else if (value < 256 * 5 / 6)
-                        {
+                        else if (value < 256 * 5 / 6) {
                             alpha = 10;
                             rgb = 2;
                         }
-                        else
-                        {
+                        else {
                             alpha = 15;
                             rgb = 0;
                         }
