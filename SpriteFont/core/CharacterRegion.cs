@@ -5,66 +5,58 @@ using System.Globalization;
 using System.Collections.Generic;
 
 namespace mage {
-    // Describes a range of consecutive characters that should be included in the font.
+    
+    // Describes a range of consecutive characters.
     [TypeConverter(typeof(CharacterRegionTypeConverter))]
     public class CharacterRegion {
-        // Constructor.
-        public CharacterRegion(char start, char end) {
-            if (start > end)
-                throw new ArgumentException();
 
-            this.Start = start;
-            this.End = end;
+        public CharacterRegion(char start, char end) {
+            if (start > end) {
+                throw new ArgumentException(string.Format("The start character '{0}' may not be larger than the end character '{1}'.", start, end));
+            }
+
+            Start = start;
+            End = end;
         }
 
+        public readonly char Start;
+        public readonly char End;
 
-        // Fields.
-        public char Start;
-        public char End;
-
-
-        // Enumerates all characters within the region.
-        public IEnumerable<Char> Characters {
+        // Enumerates all individual characters within this character region.
+        public IEnumerable<char> Characters {
             get {
-                for (char c = Start; c <= End; c++) {
+                for (char c = Start; c <= End; ++c) {
                     yield return c;
                 }
             }
         }
 
-
         // Flattens a list of character regions into a combined list of individual characters.
-        public static IEnumerable<Char> Flatten(IEnumerable<CharacterRegion> regions) {
+        public static IEnumerable<char> Flatten(IEnumerable<CharacterRegion> regions) {
+            if (regions == null) {
+                throw new NullReferenceException("The given regions may not be equal to null.");
+            }
             if (regions.Any()) {
-                // If we have any regions, flatten them and remove duplicates.
                 return regions.SelectMany(region => region.Characters).Distinct();
             }
-            else {
-                // If no regions were specified, use the default.
-                return defaultRegion.Characters;
-            }
+            return defaultRegion.Characters;
         }
 
-
-        // Default to just the base ASCII character set.
-        static CharacterRegion defaultRegion = new CharacterRegion(' ', '~');
+        // The base ASCII character set.
+        private static readonly CharacterRegion defaultRegion = new CharacterRegion(' ', '~');
     }
-
-
 
     // Custom type converter enables CommandLineParser to parse CharacterRegion command line options.
     public class CharacterRegionTypeConverter : TypeConverter {
+
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) {
             return sourceType == typeof(string);
         }
 
-
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value) {
-            // Input must be a string.
             string source = value as string;
-
             if (string.IsNullOrEmpty(source)) {
-                throw new ArgumentException();
+                throw new ArgumentException("The given string value may not be null or empty.");
             }
 
             // Supported input formats:
@@ -79,31 +71,23 @@ namespace mage {
 
             switch (split.Length) {
                 case 1:
-                    // Only a single character (eg. "a").
                     return new CharacterRegion(split[0], split[0]);
-
                 case 2:
-                    // Range of characters (eg. "a-z").
                     return new CharacterRegion(split[0], split[1]);
-
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentException(string.Format("Unsupported string format: '{0}'.", source));
             }
         }
 
-
-        static char ConvertCharacter(string value) {
+        protected static char ConvertCharacter(string value) {
             if (value.Length == 1) {
-                // Single character directly specifies a codepoint.
                 return value[0];
             }
-            else {
-                // Otherwise it must be an integer (eg. "32" or "0x20").
-                return (char)(int)intConverter.ConvertFromInvariantString(value);
-            }
+            
+            // Otherwise it must be an integer (eg. "32" or "0x20").
+            return (char)(int)intConverter.ConvertFromInvariantString(value);
         }
 
-
-        static TypeConverter intConverter = TypeDescriptor.GetConverter(typeof(int));
+        protected static readonly TypeConverter intConverter = TypeDescriptor.GetConverter(typeof(int));
     }
 }

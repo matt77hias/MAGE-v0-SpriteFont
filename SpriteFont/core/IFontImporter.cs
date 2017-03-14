@@ -5,9 +5,10 @@ namespace mage {
     // Importer interface to support multiple source font formats.
     public interface IFontImporter {
 
-        void Import(CommandLineOptions options);
-
         IEnumerable<Glyph> Glyphs { get; }
         float LineSpacing { get; }
+
+        // Imports the source font associated to the given command line options.
+        void Import(CommandLineOptions options);
     }
 }

@@ -8,7 +8,7 @@ using System.Reflection;
 using System.ComponentModel;
 
 namespace mage {
-    // Reusable, reflection based helper for parsing commandline options.
+    
     public class CommandLineParser {
         object optionsObject;
 
@@ -60,52 +60,44 @@ namespace mage {
             FieldInfo missingRequiredOption = requiredOptions.FirstOrDefault(field => !IsList(field) || GetList(field).Count == 0);
 
             if (missingRequiredOption != null) {
-                ShowError("Missing argument '{0}'", GetOptionName(missingRequiredOption));
+                ShowError("Missing argument '{0}'.", GetOptionName(missingRequiredOption));
                 return false;
             }
 
             return true;
         }
 
-
-        bool ParseArgument(string arg) {
+        private bool ParseArgument(string arg) {
             if (arg.StartsWith("/")) {
                 // Parse an optional argument.
                 char[] separators = { ':' };
-
                 string[] split = arg.Substring(1).Split(separators, 2, StringSplitOptions.None);
-
                 string name = split[0];
                 string value = (split.Length > 1) ? split[1] : "true";
 
                 FieldInfo field;
-
                 if (!optionalOptions.TryGetValue(name.ToLowerInvariant(), out field)) {
-                    ShowError("Unknown option '{0}'", name);
+                    ShowError("Unknown option '{0}'.", name);
                     return false;
                 }
-
                 return SetOption(field, value);
             }
             else {
                 // Parse a required argument.
                 if (requiredOptions.Count == 0) {
-                    ShowError("Too many arguments");
+                    ShowError("Too many arguments.");
                     return false;
                 }
 
                 FieldInfo field = requiredOptions.Peek();
-
                 if (!IsList(field)) {
                     requiredOptions.Dequeue();
                 }
-
                 return SetOption(field, arg);
             }
         }
 
-
-        bool SetOption(FieldInfo field, string value) {
+        private bool SetOption(FieldInfo field, string value) {
             try {
                 if (IsList(field)) {
                     // Append this value to a list of options.
@@ -125,22 +117,18 @@ namespace mage {
         }
 
 
-        static object ChangeType(string value, Type type) {
+        private static object ChangeType(string value, Type type) {
             TypeConverter converter = TypeDescriptor.GetConverter(type);
-
             return converter.ConvertFromInvariantString(value);
         }
 
-
-        static bool IsList(FieldInfo field) {
+        private static bool IsList(FieldInfo field) {
             return typeof(IList).IsAssignableFrom(field.FieldType);
         }
 
-
-        IList GetList(FieldInfo field) {
+        private IList GetList(FieldInfo field) {
             return (IList)field.GetValue(optionsObject);
         }
-
 
         static Type ListElementType(FieldInfo field) {
             var interfaces = from i in field.FieldType.GetInterfaces()

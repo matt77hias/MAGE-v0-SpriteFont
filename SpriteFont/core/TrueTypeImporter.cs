@@ -10,16 +10,15 @@ using System.Runtime.InteropServices;
 namespace mage {
     // Uses System.Drawing (aka GDI+) to rasterize TrueType fonts into a series of glyph bitmaps.
     public class TrueTypeImporter : IFontImporter {
-        // Properties hold the imported font data.
+        
         public IEnumerable<Glyph> Glyphs { get; private set; }
-
         public float LineSpacing { get; private set; }
 
 
         // Size of the temp surface used for GDI+ rasterization.
         const int MaxGlyphSize = 1024;
 
-
+        // Imports the source font associated to the given command line options.
         public void Import(CommandLineOptions options) {
             // Create a bunch of GDI+ objects.
             using (Font font = CreateFont(options))

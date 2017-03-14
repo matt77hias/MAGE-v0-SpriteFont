@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -7,8 +8,45 @@ namespace mage {
     
     public static class BitmapUtils {
 
+        // Returns the regions of the glyphs in the given bitmap.
+        public static IEnumerable<Rectangle> GetGlyphRegions(Bitmap bitmap, Func<Color, bool> isMarkerPredicate) {
+            if (bitmap == null) {
+                throw new NullReferenceException("The given bitmap may not be equal to null.");
+            }
+            if (isMarkerPredicate == null) {
+                throw new NullReferenceException("The given predicate may not be equal to null.");
+            }
+
+            using (var bitmapData = new PixelAccessor(bitmap, ImageLockMode.ReadOnly)) {
+                for (int y = 1; y < bitmap.Height; ++y) {
+                    for (int x = 1; x < bitmap.Width; ++x) {
+
+                        // Look for the top left corner of a character 
+                        // (a pixel that is not pink, but was pink immediately to the left and above it)
+                        if (!isMarkerPredicate(bitmapData[x, y]) &&
+                             isMarkerPredicate(bitmapData[x - 1, y]) &&
+                             isMarkerPredicate(bitmapData[x, y - 1])) {
+
+                            // Measure the size of this character.
+                            int width = 1;
+                            while ((x + width < bitmap.Width) && !isMarkerPredicate(bitmapData[x + width, y])) {
+                                ++width;
+                            }
+
+                            int height = 1;
+                            while ((y + height < bitmap.Height) && !isMarkerPredicate(bitmapData[x, y + height])) {
+                                ++height;
+                            }
+
+                            yield return new Rectangle(x, y, width, height);
+                        }
+                    }
+                }
+            }
+        }
+
         // Returns the region of the given bitmap.
-        public static Rectangle GetRegion(Bitmap bitmap) {
+        public static Rectangle GetBitmapRegion(Bitmap bitmap) {
             if (bitmap == null) {
                 throw new NullReferenceException("The given bitmap may not be equal to null.");
             }
@@ -46,10 +84,10 @@ namespace mage {
                 throw new NullReferenceException("The given destination bitmap may not be equal to null.");
             }
             if (sourceRegion.Width != destRegion.Width) {
-                throw new ArgumentException(String.Format("The given regions must have the same width: {0} != {1}.", sourceRegion.Width, destRegion.Width));
+                throw new ArgumentException(string.Format("The given regions must have the same width: '{0}' != '{1}'.", sourceRegion.Width, destRegion.Width));
             }
             if (sourceRegion.Height != destRegion.Height) {
-                throw new ArgumentException(String.Format("The given regions must have the same height: {0} != {1}.", sourceRegion.Height, destRegion.Height));
+                throw new ArgumentException(string.Format("The given regions must have the same height: '{0}' != '{1}'.", sourceRegion.Height, destRegion.Height));
             }
 
             using (var sourceData = new PixelAccessor(sourceBitmap, ImageLockMode.ReadOnly, sourceRegion))
@@ -155,7 +193,7 @@ namespace mage {
 
         // Converts a bitmap to the specified pixel format.
         public static Bitmap ConvertToPixelFormat(Bitmap bitmap, PixelFormat format) {
-            return bitmap.Clone(GetRegion(bitmap), format);
+            return bitmap.Clone(GetBitmapRegion(bitmap), format);
         }
 
         // To avoid filtering artifacts when scaling or rotating fonts that do not use premultiplied alpha,
@@ -204,7 +242,7 @@ namespace mage {
                 }
 
                 this.Bitmap = bitmap;
-                this.Region = region.GetValueOrDefault(GetRegion(bitmap));
+                this.Region = region.GetValueOrDefault(GetBitmapRegion(bitmap));
                 this.BitmapData = Bitmap.LockBits(Region, mode, PixelFormat.Format32bppArgb);
             }
 

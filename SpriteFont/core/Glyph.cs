@@ -5,7 +5,7 @@ namespace mage {
    
     // A class of single characters within a font.
     public sealed class Glyph {
-        
+
         public Glyph(char character, Bitmap bitmap, Rectangle? region = null) {
             if (bitmap == null) {
                 throw new NullReferenceException("The given bitmap may not be equal to null.");
@@ -13,7 +13,7 @@ namespace mage {
 
             Character = character;
             Bitmap = bitmap;
-            Region = region.GetValueOrDefault(BitmapUtils.GetRegion(bitmap));
+            Region = region.GetValueOrDefault(BitmapUtils.GetBitmapRegion(bitmap));
         }
 
         // Glyph character.
