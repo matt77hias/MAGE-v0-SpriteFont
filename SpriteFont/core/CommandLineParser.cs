@@ -116,7 +116,6 @@ namespace mage {
             }
         }
 
-
         private static object ChangeType(string value, Type type) {
             TypeConverter converter = TypeDescriptor.GetConverter(type);
             return converter.ConvertFromInvariantString(value);
