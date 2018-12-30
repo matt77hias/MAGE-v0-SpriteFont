@@ -1,7 +1,7 @@
 # MAGE-SpritFont
 
 ## About
-A command line tool for generating binary sprite fonts for use with `mage::SpriteFont` in [MAGE](https://github.com/matt77hias/MAGE).
+A command line tool for generating binary sprite fonts for use with `mage::rendering::SpriteFont` in [MAGE](https://github.com/matt77hias/MAGE).
 
 <p align="center">
 <img src="res/calibri.png" width="214">
