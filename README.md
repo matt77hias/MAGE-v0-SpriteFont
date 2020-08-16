@@ -4,10 +4,10 @@
 A command line tool for generating binary sprite fonts for use with `mage::rendering::SpriteFont` in [MAGE](https://github.com/matt77hias/MAGE).
 
 <p align="center">
-<img src="res/calibri.png" width="214">
-<img src="res/comicsansms.png" width="214">
-<img src="res/consolas.png" width="214">
-<img src="res/calibri.png" width="214">
+<img src="res/calibri.png" width="210">
+<img src="res/comicsansms.png" width="210">
+<img src="res/consolas.png" width="210">
+<img src="res/calibri.png" width="210">
 </p>
 
 ## Codebase
